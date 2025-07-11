@@ -1,3 +1,25 @@
+from openpyxl import Workbook
+
+# Create a workbook in write-only mode
+wb = Workbook(write_only=True)
+ws = wb.create_sheet()
+
+# Add some data
+for i in range(1000):
+    ws.append([f'This is row {i}', i])
+
+# Save the file
+wb.save('optimized_excel.xlsx')
+
+print("Excel file created in write-only mode.")
+
+
+
+
+
+
+
+
 Hi Manya,
 
 As discussed on call, the MIDs provided are not online MIDs, and all transactions will be processed through physical POS (TID). Therefore, all TIDs should ideally cover the required expenses.
