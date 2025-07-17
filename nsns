@@ -1,3 +1,51 @@
+filename listfiles pipe "dir /Q /S C:\sas\data\uploads" lrecl=32767;
+
+data file_details;
+    infile listfiles truncover;
+    length line $500. owner $100. size 8. filename $200.;
+
+    input line $char500.;
+
+    /* Parse only file lines (not directories or header lines) */
+    if index(line, ":") = 0 and index(line, "<DIR>") = 0 then do;
+        /* Example line format:
+           07/16/2025  02:34 PM           1,234 domain\username        filename.csv
+        */
+        /* Break line into pieces */
+        date = scan(line, 1, ' ');
+        time = scan(line, 2, ' ');
+        ampm = scan(line, 3, ' ');
+        size_txt = scan(line, 4, ' ');
+        owner = scan(line, 5, ' ');
+        do i = 6 to countw(line, ' ');
+            filename = catx(' ', filename, scan(line, i, ' '));
+        end;
+
+        size = input(compress(size_txt, ','), best.);
+        if not missing(owner) then output;
+    end;
+run;
+
+proc sql;
+    select owner, sum(size)/1024 as total_kb format=comma10.
+    from file_details
+    group by owner
+    order by calculated total_kb desc;
+quit;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 filename listfiles pipe "ls -lh /sas/data/uploads" lrecl=32767;
 
 data file_details;
