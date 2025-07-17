@@ -1,3 +1,80 @@
+/* 🛠️ Set your base path */
+%let base_path = \\sas-server\sftp_data;
+
+data file_inventory;
+    length path $512 fullpath $1024 filename $256 user_folder $100;
+    retain path;
+
+    /* Step 1: Start with base directory */
+    path = "&base_path";
+    output;
+run;
+
+/* Step 2: Loop through folders recursively */
+%macro scan_folders;
+
+    %do %while (%sysfunc(exist(work.file_inventory)));
+
+        /* Extract first unprocessed path */
+        data _null_;
+            set file_inventory(obs=1);
+            call symputx('current_path', path);
+        run;
+
+        /* Remove it from the list */
+        data file_inventory;
+            set file_inventory;
+            if path ne "&current_path";
+        run;
+
+        /* Read contents of current path */
+        data folder_scan;
+            length path $512 fullpath $1024 filename $256 user_folder $100;
+            rc = filename('mypipe', "&current_path");
+            did = dopen('mypipe');
+
+            if did > 0 then do i = 1 to dnum(did);
+                filename = dread(did, i);
+                fullpath = cats("&current_path\", filename);
+                fid = filename('fcheck', fullpath);
+                if fexist('fcheck') then do;
+                    /* It's a file */
+                    size = filesize(fullpath);
+                    moddate = datetime();
+                    user_folder = scan(fullpath, countw(fullpath, '\') - 1, '\'); /* Second last folder name as user */
+                    output;
+                end;
+                else if dopen('fcheck') then do;
+                    /* It's a subfolder → queue it for next scan */
+                    path = fullpath;
+                    call execute('data file_inventory; set file_inventory; output; run;');
+                end;
+            end;
+            rc = dclose(did);
+        run;
+
+        /* Append to final dataset */
+        proc append base=all_files data=folder_scan force; run;
+
+    %end;
+
+%mend;
+
+/* Step 3: Run the scan macro */
+%scan_folders
+proc sql;
+    select user_folder, count(*) as num_files,
+           sum(size)/1048576 as total_mb format=comma10.2
+    from all_files
+    group by user_folder
+    order by total_mb desc;
+quit;
+
+
+
+
+
+
 filename listfiles pipe "dir /Q /S C:\sas\data\uploads" lrecl=32767;
 
 data file_details;
