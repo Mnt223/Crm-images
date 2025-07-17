@@ -1,3 +1,18 @@
+
+filename checkspace pipe "du -sh /sas/data/users/*" lrecl=32767;
+
+data space_usage;
+    infile checkspace truncover;
+    input size_raw $ path $100.;
+    user = scan(path, -1, '/');
+run;
+
+
+
+
+
+
+
 from openpyxl import Workbook
 
 # Create a workbook in write-only mode
