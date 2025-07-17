@@ -1,3 +1,17 @@
+filename listfiles pipe "ls -lh /sas/data/uploads" lrecl=32767;
+
+data file_details;
+    infile listfiles truncover;
+    input perms $10. links $ owner $ group $ size_raw $ date1 $ date2 $ date3 $ filename $100.;
+run;
+
+proc sql;
+    select owner, sum(input(size_raw, best.)) as total_size
+    from file_details
+    group by owner;
+quit;
+
+
 
 filename checkspace pipe "du -sh /sas/data/users/*" lrecl=32767;
 
