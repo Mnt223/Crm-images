@@ -1,3 +1,26 @@
+My apologies for the confusion. Thank you for the clarification.
+Let's focus squarely on the Revolver at Risk model from a concise, business-first perspective.
+From a business perspective, stakeholders want this model because it functions as a crucial defense mechanism to protect our most profitable asset: the existing revolver portfolio.
+This model directly addresses the revenue leakage shown in the summary. By identifying which high-value customers are about to stop revolving, it allows us to shift from generic marketing to surgical, cost-effective retention campaigns.
+For stakeholders, the purpose is simple: it is significantly more profitable to retain an existing high-margin customer than to acquire a new one. This model is the tool to protect our core Interest Bearing Balance (IBB) and preserve the fundamental profitability of the cards business.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* 🛠️ Set your base path */
 %let base_path = \\sas-server\sftp_data;
 
